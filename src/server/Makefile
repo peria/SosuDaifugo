@@ -1,8 +1,16 @@
-CXX=clang++
-CXXFLAGS=-O2 -std=c++11 -W
+CXX = clang++
+CXXFLAGS = -O2 -std=c++11 -W
 
-all: socket.o
+SRC = main.cc server.cc socket.cc
+OBJ = $(SRC:.cc=.o)
 
-.cc.o:
+all: server
+
+server: $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+%.o: %.cc %.h
 	$(CXX) $(CXXFLAGS) -c $<
 
+clean:
+	$(RM) -rf $(OBJ) server
