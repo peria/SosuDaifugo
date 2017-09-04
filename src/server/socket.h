@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sys/types.h>
+#include <string>
 
 class Socket {
  public:
@@ -10,14 +11,19 @@ class Socket {
   Socket();
   ~Socket();
 
-  void setup(int port);
+  // |port| での待ち状態を作る
+  void listen(int port);
+  // listen() での待ち状態から接続を pop する
   Socket accept() const;
-  void read(void* buf, size_t size) const;
+
+  std::string receiveMessage() const;
+  void sendMessage(const std::string& str) const;
 
   bool isValid() const { return descriptor_ != kInvalid; }
 
  private:
   explicit Socket(int);
+  ssize_t read(void* buf, size_t size) const;
 
   Descriptor descriptor_ = kInvalid;
 };

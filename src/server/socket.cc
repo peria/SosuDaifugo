@@ -5,6 +5,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <string>
+#include <iostream>
+
+using std::string;
+
+namespace {
+constexpr ssize_t kErrorSize = -1;
+}  // namespace
+
 Socket::Socket() : descriptor_(kInvalid) {}
 
 Socket::Socket(int descriptor) : descriptor_(descriptor) {}
@@ -14,20 +23,19 @@ Socket::~Socket() {
     close(descriptor_);
 }
 
-void Socket::setup(int port) {
+void Socket::listen(int port) {
   if (isValid())
     return;
   
   descriptor_ = socket(AF_INET, SOCK_STREAM, 0);
 
-  // set up acceptor
   struct sockaddr_in addr;
   addr.sin_family = AF_INET;
   addr.sin_port = htons(port);
   addr.sin_addr.s_addr = INADDR_ANY;
   bind(descriptor_, (struct sockaddr*)&addr, sizeof(addr));
 
-  // wait
+  // TODO: set approprivate size of queue.
   ::listen(descriptor_, 5);
 }
 
@@ -41,10 +49,34 @@ Socket Socket::accept() const {
   return sock;
 }
 
-void Socket::read(void* buf, size_t size) const {
-  if (!isValid())
-    return;
+string Socket::receiveMessage() const {
+  static char buffer[1024] {};
+  static constexpr int kBufferSize = 1000;
 
-  // TODO: recv() may fail to receive all message in one call.
-  recv(descriptor_, buf, size, 0);
+  string message;
+  while (true) {
+    ssize_t size = this->read(buffer, kBufferSize);
+    if (size < 0) {
+      std::cerr << "Fail to load a message from socket " << descriptor_ << "\n";
+      return "";
+    }
+
+    buffer[size] = '\0';
+    message += buffer;
+    if (size < kBufferSize)
+      break;
+  }
+  return message;
+}
+
+void Socket::sendMessage(const std::string& str) const {
+  // Assume |str| can be sent in one message.
+  ::write(descriptor_, str.data(), str.size());
+}
+
+ssize_t Socket::read(void* buf, size_t size) const {
+  if (!isValid())
+    return kErrorSize;
+
+  return recv(descriptor_, buf, size, 0);
 }

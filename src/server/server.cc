@@ -3,11 +3,21 @@
 #include <iostream>
 
 Server::Server() {
-  acceptor_.setup(1234);
+  acceptor_.listen(1234);
+}
 
-  client_ = acceptor_.accept();
+void Server::run() {
+  const int n = 4;
+  for (int i = 0; i < n; ++i) {
+    clients_.emplace_back(acceptor_.accept());
+    clients_.back().shakeHands();
+  }
 
-  char buf[1024] {};
-  client_.read(buf, 1000);
-  std::cout << buf << "\n";
+  // // while (true) {
+  // Game game;
+  // while (!game.end()) {
+  //   // turn
+  // }
+  // // report result
+  // // }  // while
 }

@@ -1,7 +1,9 @@
 CXX = clang++
-CXXFLAGS = -O2 -std=c++11 -W
+INCLUDE = -I..
+CXXFLAGS = -O2 -std=c++11 -W $(INCLUDE)
 
-SRC = main.cc server.cc socket.cc
+
+SRC = main.cc server.cc socket.cc client.cc
 OBJ = $(SRC:.cc=.o)
 
 all: server
