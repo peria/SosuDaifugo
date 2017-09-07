@@ -8,6 +8,10 @@ class Client {
   Client(Socket&& socket);
 
   bool shakeHands();
+  std::string receiveMessage() const;
+  void sendMessage(const std::string& str) const;
+
+  const std::string& name() const { return name_; }
 
  private:
   const Socket socket_;
