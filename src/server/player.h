@@ -4,9 +4,8 @@
 
 class Player {
  public:
-  Player(const Client& client);
-  
+  Player();
+
  private:
-  const Client& client_;
 };
 

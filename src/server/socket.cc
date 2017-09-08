@@ -1,14 +1,13 @@
 #include "socket.h"
 
+#include <cstring>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #include <string>
-#include <iostream>
 
-using std::string;
+#include "glog/logging.h"
 
 namespace {
 constexpr ssize_t kErrorSize = -1;
@@ -19,8 +18,7 @@ Socket::Socket() : descriptor_(kInvalid) {}
 Socket::Socket(int descriptor) : descriptor_(descriptor) {}
 
 Socket::~Socket() {
-  if (!isValid())
-    close(descriptor_);
+  close(descriptor_);
 }
 
 void Socket::listen(int port) {
@@ -36,6 +34,7 @@ void Socket::listen(int port) {
   bind(descriptor_, (struct sockaddr*)&addr, sizeof(addr));
 
   // TODO: set approprivate size of queue.
+  LOG(INFO) << "Listening in port " << port;
   ::listen(descriptor_, 5);
 }
 
@@ -49,16 +48,16 @@ Socket Socket::accept() const {
   return sock;
 }
 
-string Socket::receiveMessage() const {
+std::string Socket::receiveMessage() const {
   static char buffer[1024] {};
   static constexpr int kBufferSize = 1000;
 
-  string message;
+  std::string message;
   while (true) {
     ssize_t size = this->read(buffer, kBufferSize);
     if (size < 0) {
-      std::cerr << "Fail to load a message from socket " << descriptor_ << "\n";
-      return "";
+      LOG(ERROR) << "Fail to load a message from socket " << descriptor_
+                 << ": " << std::strerror(errno) << "\n";
     }
 
     buffer[size] = '\0';
@@ -66,12 +65,18 @@ string Socket::receiveMessage() const {
     if (size < kBufferSize)
       break;
   }
+
+  // Trim \r and \n
+  while (!message.empty() && (message.back() == '\r' || message.back() == '\n')) {
+    message.pop_back();
+  }
   return message;
 }
 
 void Socket::sendMessage(const std::string& str) const {
   // Assume |str| can be sent in one message.
   ::write(descriptor_, str.data(), str.size());
+  ::write(descriptor_, "\n", 1);
 }
 
 ssize_t Socket::read(void* buf, size_t size) const {

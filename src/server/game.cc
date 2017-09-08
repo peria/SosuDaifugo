@@ -1,17 +1,13 @@
 #include "game.h"
 
-#include <algorithm>
 #include <random>
 #include <vector>
 
-#include "client.h"
+#include "json.h"
 
-using std::vector;
-
-Game::Game(const vector<Client>& clients) {
-  for (const auto& client : clients) {
-    players_.emplace_back(new Player(client));
-  }
-  std::shuffle(players_.begin(), players_.end(), random_);
+Game::Game(int num_players, std::mt19937& random)
+  : number_in_play_(num_players),
+    players_(num_players),
+    random_(random) {
 }
 

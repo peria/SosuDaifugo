@@ -1,15 +1,15 @@
 #include "client.h"
 
 #include <string>
+#include "glog/logging.h"
 #include "json.h"
 
 Client::Client(Socket&& socket) : socket_(socket) {}
 
 bool Client::shakeHands() {
-  Json message(socket_.receiveMessage());
-  // TODO: Validate the message
-  name_ = message["name"];
-  socket_.sendMessage(Json({"name", name_}).dump());
+  Json message = Json::parse(socket_.receiveMessage());
+  name_ = (message.find("name") != message.end()) ? message["name"] : "NoName";
+  socket_.sendMessage(Json({{"name", name_}}).dump());
   return true;
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+#include <random>
 #include <vector>
 
 #include "client.h"
@@ -13,5 +15,6 @@ class Server {
 
  private:
   Socket acceptor_;
-  std::vector<Client> clients_;
+  std::vector<std::unique_ptr<Client>> clients_;
+  std::mt19937 random_;
 };
