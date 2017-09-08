@@ -18,7 +18,8 @@ Socket::Socket() : descriptor_(kInvalid) {}
 Socket::Socket(int descriptor) : descriptor_(descriptor) {}
 
 Socket::~Socket() {
-  close(descriptor_);
+  if (!isValid())
+    close(descriptor_);
 }
 
 void Socket::listen(int port) {

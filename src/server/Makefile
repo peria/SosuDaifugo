@@ -2,7 +2,7 @@ INCLUDE = -I..
 LIBRARY = -lglog -lgflags
 
 CXX = clang++
-CXXFLAGS = -O2 -std=c++11 -W $(INCLUDE)
+CXXFLAGS = -O0 -g -std=c++11 -W $(INCLUDE)
 
 
 SRC = main.cc
